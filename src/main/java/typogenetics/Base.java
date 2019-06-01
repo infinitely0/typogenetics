@@ -17,7 +17,7 @@ public class Base {
 		this.setLetter(letter);
 	}
 
-	public Base(char letter) throws InvalidBaseException {
+	public Base(char letter) {
 		this.setLetter(parseLetter(letter));
 	}
 
@@ -40,6 +40,7 @@ public class Base {
 		return derivative;
 	}
 
+	@Override
 	public String toString() {
 		switch (getLetter()) {
 			case A: return "A";
@@ -50,24 +51,14 @@ public class Base {
 		}
 	}
 
-	public static Letter parseLetter(char letter) throws InvalidBaseException {
+	public static Letter parseLetter(char letter) {
 		switch (letter) {
 			case 'A': return Letter.A;
 			case 'C': return Letter.C;
 			case 'G': return Letter.G;
 			case 'T': return Letter.T;
-			default : throw new InvalidBaseException();
+			default : throw new IllegalArgumentException("Invalid base type");
 		}
-	}
-
-}
-
-class InvalidBaseException extends Exception {
-
-	private static final long serialVersionUID = 1L;
-
-	public InvalidBaseException() {
-		super("Invalid base");
 	}
 
 }

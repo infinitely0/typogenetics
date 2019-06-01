@@ -2,24 +2,27 @@ package typogenetics;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.AbstractList;
 
-public class Strand {
+public class Strand extends AbstractList<Base> {
 
-	private List<Base> sequence;
+	private final List<Base> sequence;
 
-	public Strand(List<Base> sequence) {
-		this.sequence = sequence;
-	}
-
-	public Strand(String sequence) throws InvalidBaseException {
+	public Strand(String sequence) {
 		this.sequence = parseStrand(sequence);
 	}
 
-	public List<Base> getSequence() {
-		return sequence;
+	@Override
+	public Base get(int index) {
+		return sequence.get(index);
 	}
 
-	public static List<Base> parseStrand(String string) throws InvalidBaseException {
+	@Override
+	public int size() {
+		return sequence.size();
+	}
+
+	public static List<Base> parseStrand(String string) {
 		List<Base> sequence = new ArrayList<>();
 
 		for (int i = 0; i < string.length(); i++) {

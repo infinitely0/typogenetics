@@ -1,13 +1,30 @@
 package typogenetics;
 
-import java.util.List;
-import java.util.ArrayList;
+public final class Ribosome {
 
-public class Ribosome {
+	@SuppressWarnings("unchecked")
+	public static <T extends AbstractProtein> T translate(Strand strand, Class<?> type) {
 
-	public static List<AminoAcid> translate(Strand strand) {
-		List<AminoAcid> aminoAcids = new ArrayList<>();
-		return aminoAcids;
+		AbstractProtein protein;
+
+		if (type == Protein.class) {
+			protein = new Protein();
+		} else if (type == Enzyme.class) {
+			protein = new Enzyme();
+		} else {
+			throw new IllegalArgumentException("Invalid protein type");
+		}
+
+		for (int i = 0; i < strand.size(); i++) {
+			Base first = strand.get(i);
+			Base second = strand.get(++i);
+
+			AminoAcid aminoAcid = new AminoAcid(first, second);
+
+			protein.add(aminoAcid);
+		}
+
+		return (T) protein;
 	}
 
 }

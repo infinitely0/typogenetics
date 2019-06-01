@@ -1,13 +1,18 @@
 package typogenetics;
 
-import java.util.List;
+public class Enzyme extends AbstractProtein {
 
-public class Enzyme {
-
-	List<AminoAcid> aminoAcids;
+	private Base bindingPreference;
 
 	public Enzyme() {
+		setBindingPreference();
+	}
 
+	public void setBindingPreference() {
+	}
+
+	public Base getBindingPreference() {
+		return bindingPreference;
 	}
 
 }
