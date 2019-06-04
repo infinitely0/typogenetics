@@ -2,12 +2,12 @@ package typogenetics;
 
 public class AminoAcid {
 
-	enum Command { spa, cut, dlt, swi,
+	public enum Command { spa, cut, dlt, swi,
 				   mvr, mvl, cop, off,
 				   ina, inc, ing, itt,
 				   rpy, rpu, lpy, lpu };
 
-	enum Direction { l, r, s };
+	public enum Direction { l, r, s };
 
 	private Duplet duplet;
 	private Command command;

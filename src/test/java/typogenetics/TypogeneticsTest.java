@@ -8,7 +8,6 @@ import org.junit.jupiter.api.BeforeEach;
 
 public class TypogeneticsTest {
 
-
 	@BeforeAll
 	public void beforeAll() {
 	}
@@ -74,13 +73,46 @@ public class TypogeneticsTest {
 
 	@Test
 	public void enzymeTest() throws Exception {
-		Strand strand = new Strand("CAATACGTTAACGCATCAGGCTAC");
-
+		Strand strand = new Strand("CACACACAAT");
 		Enzyme enzyme = Ribosome.translate(strand, Enzyme.class);
 
 		assertEquals(enzyme.get(0).toString(),
 				new AminoAcid(strand.get(0), strand.get(1)).toString());
+	}
 
+	@Test
+	public void bindingRotationTest() throws Exception {
+
+		String[] strands =  { "CA", "CACC", "CAAT", "CACT", "CACTCT" };
+		String[] bindings = { "A",  "A",    "G",    "C",    "T" };
+
+		for (int i = 0; i < strands.length; i++) {
+			Strand strand = new Strand(strands[i]);
+			Enzyme enzyme = Ribosome.translate(strand, Enzyme.class);
+			assertEquals(bindings[i], enzyme.getBindingBase().toString());
+		}
+	}
+
+	@Test
+	public void bindingOrientationTest() {
+
+		String[] rightStart = { "ATCACC", "ATCAAT", "ATCACT", "ATCACTCT" };
+		String[] bindings =   { "C",      "A",      "T",      "G" };
+
+		for (int i = 0; i < rightStart.length; i++) {
+			Strand strand = new Strand(rightStart[i]);
+			Enzyme enzyme = Ribosome.translate(strand, Enzyme.class);
+			assertEquals(bindings[i], enzyme.getBindingBase().toString());
+		}
+
+		String[] leftStart= { "GTCACC", "GTCAAT", "GTCACT", "GTCACTCT" };
+		String[] bindings2 = { "G",      "T",      "A",      "C" };
+
+		for (int i = 0; i < leftStart.length; i++) {
+			Strand strand = new Strand(leftStart[i]);
+			Enzyme enzyme = Ribosome.translate(strand, Enzyme.class);
+			assertEquals(bindings2[i], enzyme.getBindingBase().toString());
+		}
 	}
 
 }

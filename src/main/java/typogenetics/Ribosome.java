@@ -19,9 +19,8 @@ public final class Ribosome {
 			Base first = strand.get(i);
 			Base second = strand.get(++i);
 
-			AminoAcid aminoAcid = new AminoAcid(first, second);
-
-			protein.add(aminoAcid);
+			AminoAcid aa = new AminoAcid(first, second);
+			protein.add(aa);
 		}
 
 		return (T) protein;
