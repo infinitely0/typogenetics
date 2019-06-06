@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import java.util.List;
 
 public class TypogeneticsTest {
 
@@ -54,7 +55,7 @@ public class TypogeneticsTest {
 	public void proteinTest() throws Exception {
 		Strand strand = new Strand("CAATACGTTAACGCATCAGGCTAC");
 
-		Protein protein = Ribosome.translate(strand, Protein.class);
+		Protein protein = Ribosome.translate(strand, Protein.class).get(0);
 
 		AminoAcid CA = protein.get(0);
 		assertEquals(AminoAcid.Command.mvr, CA.getCommand());
@@ -67,14 +68,42 @@ public class TypogeneticsTest {
 
 		assertEquals(AminoAcid.Command.swi, AT.getCommand());
 		assertEquals(AminoAcid.Direction.r, AT.getDirection());
+	}
 
-		// TODO Test base string of odd length
+	@Test
+	public void multiProteinTest() throws Exception {
+		Strand strand = new Strand("CAATAACAAT");
+		List<Protein> list = Ribosome.translate(strand, Protein.class);
+
+		assertEquals(2, list.size());
+
+		strand = new Strand("CAATAACAATAATT");
+		list = Ribosome.translate(strand, Protein.class);
+
+		Protein p = new Protein();
+		p.add(new AminoAcid(new Base('T'), new Base('T')));
+		assertEquals(p.toString(), list.get(list.size() - 1).toString());
+	}
+
+	@Test
+	public void hangingBaseTest() throws Exception {
+		Strand strand = new Strand("CCAATTC");
+		List<Protein> list = Ribosome.translate(strand, Protein.class);
+
+		Protein p = new Protein();
+		p.add(new AminoAcid(new Base('T'), new Base('T')));
+		assertEquals(list.get(list.size() - 1).toString(), p.toString());
+
+		strand = new Strand("CCTTG");
+		p = Ribosome.translate(strand, Protein.class).get(0);
+
+		assertEquals("[CC, TT]", p.toString());
 	}
 
 	@Test
 	public void enzymeTest() throws Exception {
 		Strand strand = new Strand("CACACACAAT");
-		Enzyme enzyme = Ribosome.translate(strand, Enzyme.class);
+		Enzyme enzyme = Ribosome.translate(strand, Enzyme.class).get(0);
 
 		assertEquals(enzyme.get(0).toString(),
 				new AminoAcid(strand.get(0), strand.get(1)).toString());
@@ -88,7 +117,7 @@ public class TypogeneticsTest {
 
 		for (int i = 0; i < strands.length; i++) {
 			Strand strand = new Strand(strands[i]);
-			Enzyme enzyme = Ribosome.translate(strand, Enzyme.class);
+			Enzyme enzyme = Ribosome.translate(strand, Enzyme.class).get(0);
 			assertEquals(bindings[i], enzyme.getBindingBase().toString());
 		}
 	}
@@ -101,7 +130,7 @@ public class TypogeneticsTest {
 
 		for (int i = 0; i < rightStart.length; i++) {
 			Strand strand = new Strand(rightStart[i]);
-			Enzyme enzyme = Ribosome.translate(strand, Enzyme.class);
+			Enzyme enzyme = Ribosome.translate(strand, Enzyme.class).get(0);
 			assertEquals(bindings[i], enzyme.getBindingBase().toString());
 		}
 
@@ -110,7 +139,7 @@ public class TypogeneticsTest {
 
 		for (int i = 0; i < leftStart.length; i++) {
 			Strand strand = new Strand(leftStart[i]);
-			Enzyme enzyme = Ribosome.translate(strand, Enzyme.class);
+			Enzyme enzyme = Ribosome.translate(strand, Enzyme.class).get(0);
 			assertEquals(bindings2[i], enzyme.getBindingBase().toString());
 		}
 	}

@@ -12,8 +12,14 @@ public abstract class AbstractProtein extends AbstractList<AminoAcid> {
 		aminoAcids = new ArrayList<>();
 	}
 
+	@Override
 	public boolean add(AminoAcid aminoAcid) {
 		return aminoAcids.add(aminoAcid);
+	}
+
+	@Override
+	public void clear() {
+		aminoAcids.clear();
 	}
 
 	@Override
