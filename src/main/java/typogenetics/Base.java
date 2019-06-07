@@ -40,6 +40,16 @@ public class Base {
 		return derivative;
 	}
 
+	public Base getComplement() {
+		switch (letter) {
+			case A: return new Base('T');
+			case T: return new Base('A');
+			case C: return new Base('G');
+			case G: return new Base('C');
+			default: return null;
+		}
+	}
+
 	@Override
 	public String toString() {
 		switch (getLetter()) {

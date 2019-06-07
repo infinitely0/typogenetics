@@ -2,10 +2,10 @@ package typogenetics;
 
 public class AminoAcid {
 
-	public enum Command { spa, cut, dlt, swi,
-				   mvr, mvl, cop, off,
-				   ina, inc, ing, itt,
-				   rpy, rpu, lpy, lpu };
+	public enum Command { spa, cut, del, swi,
+						  mvr, mvl, cop, off,
+						  ina, inc, ing, ist,
+						  rpy, rpu, lpy, lpu };
 
 	public enum Direction { l, r, s };
 
@@ -23,7 +23,7 @@ public class AminoAcid {
 		switch (duplet.toString()) {
 			case "AA": command = Command.spa; break;
 			case "AC": command = Command.cut; break;
-			case "AG": command = Command.dlt; break;
+			case "AG": command = Command.del; break;
 			case "AT": command = Command.swi; break;
 			case "CA": command = Command.mvr; break;
 			case "CC": command = Command.mvl; break;
@@ -32,7 +32,7 @@ public class AminoAcid {
 			case "GA": command = Command.ina; break;
 			case "GC": command = Command.inc; break;
 			case "GG": command = Command.ing; break;
-			case "GT": command = Command.itt; break;
+			case "GT": command = Command.ist; break;
 			case "TA": command = Command.rpy; break;
 			case "TC": command = Command.rpu; break;
 			case "TG": command = Command.lpy; break;

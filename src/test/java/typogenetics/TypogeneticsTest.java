@@ -34,12 +34,14 @@ public class TypogeneticsTest {
 
 	@Test
 	public void strandTest() throws Exception {
-		String bases = "CAATACGTTAACGCATCAGGCTAC";
+		String bases = "ACGT";
 		Strand strand = new Strand(bases);
-		assertEquals(strand.get(0).toString(),
-				new Base(bases.charAt(0)).toString());
+		assertEquals("A", strand.get(0).toString());
+		assertEquals("T", strand.get(bases.length() - 1).toString());
 
-		// TODO Test base string of odd length
+		bases = "ACGTA";
+		strand = new Strand(bases);
+		assertEquals("A", strand.get(bases.length() - 1).toString());
 	}
 
 	@Test
@@ -53,7 +55,7 @@ public class TypogeneticsTest {
 
 	@Test
 	public void proteinTest() throws Exception {
-		Strand strand = new Strand("CAATACGTTAACGCATCAGGCTAC");
+		Strand strand = new Strand("CATTTTTTAC");
 
 		Protein protein = Ribosome.translate(strand, Protein.class).get(0);
 
@@ -110,9 +112,33 @@ public class TypogeneticsTest {
 	}
 
 	@Test
-	public void bindingRotationTest() throws Exception {
+	public void enzymeMoveRightTest() {
+		Strand strand = new Strand("CGCACACACTCT");
+		Enzyme enzyme = Ribosome.translate(strand, Enzyme.class).get(0);
 
+		List<Strand> strands = enzyme.bind(strand);
+
+		assertEquals("[C, G, C, A, C, A, C, A, C, T, C, T]", strands.get(0).toString());
+		assertEquals("[G, T, G]", strands.get(1).toString());
+	}
+
+	@Test
+	public void enzymeMoveLeftTest() {
+		Strand strand = new Strand("CTCGCCCC");
+		Enzyme enzyme = Ribosome.translate(strand, Enzyme.class).get(0);
+
+		List<Strand> strands = enzyme.bind(strand);
+
+		assertEquals("[C, T, C, G, C, C, C, C]", strands.get(0).toString());
+		assertEquals("[G]", strands.get(1).toString());
+	}
+
+	@Test
+	public void bindingRotationTest() throws Exception {
+		// Tests rotation aspect of ternary structure only (the following
+		// strands all start with CA which is a "straight" amino acid
 		String[] strands =  { "CA", "CACC", "CAAT", "CACT", "CACTCT" };
+		// This is where the enzyme produced from the above should bind
 		String[] bindings = { "A",  "A",    "G",    "C",    "T" };
 
 		for (int i = 0; i < strands.length; i++) {
@@ -124,9 +150,11 @@ public class TypogeneticsTest {
 
 	@Test
 	public void bindingOrientationTest() {
-
-		String[] rightStart = { "ATCACC", "ATCAAT", "ATCACT", "ATCACTCT" };
-		String[] bindings =   { "C",      "A",      "T",      "G" };
+		// This one tests rotation (as above) but with a different orientation
+		// - these strands start with AT, which is a "right" amino acid, or TT
+		// which is "left"
+		String[] rightStart = { "ATCACC", "ATCAAT", "TTCACT", "TTCACTCT" };
+		String[] bindings =   { "C",      "A",      "A",      "C" };
 
 		for (int i = 0; i < rightStart.length; i++) {
 			Strand strand = new Strand(rightStart[i]);
@@ -134,7 +162,7 @@ public class TypogeneticsTest {
 			assertEquals(bindings[i], enzyme.getBindingBase().toString());
 		}
 
-		String[] leftStart= { "GTCACC", "GTCAAT", "GTCACT", "GTCACTCT" };
+		String[] leftStart = { "GTCACC", "GTCAAT", "GTCACT", "GTCACTCT" };
 		String[] bindings2 = { "G",      "T",      "A",      "C" };
 
 		for (int i = 0; i < leftStart.length; i++) {

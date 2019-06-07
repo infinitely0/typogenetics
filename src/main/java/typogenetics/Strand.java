@@ -8,6 +8,10 @@ public class Strand extends AbstractList<Base> {
 
 	private final List<Base> sequence;
 
+	public Strand() {
+		sequence = new ArrayList<>();
+	}
+
 	public Strand(String sequence) {
 		this.sequence = parseStrand(sequence);
 	}
@@ -18,8 +22,22 @@ public class Strand extends AbstractList<Base> {
 	}
 
 	@Override
+	public boolean add(Base base) {
+		return sequence.add(base);
+	}
+
+	@Override
 	public int size() {
 		return sequence.size();
+	}
+
+	public int indexOf(Base base) {
+		for (int i = 0; i < sequence.size(); i++) {
+			if (base.toString().equals(sequence.get(i).toString())) {
+				return i;
+			}
+		}
+		return -1;
 	}
 
 	public static List<Base> parseStrand(String string) {
