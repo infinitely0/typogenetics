@@ -10,13 +10,6 @@ import typogenetics.Base.Derivative;
 
 public class Enzyme extends AbstractProtein {
 
-	final Command[] movements = { Command.mvr, Command.mvl, Command.rpy,
-								  Command.rpu, Command.lpy, Command.lpu,
-								  Command.swi };
-
-	final Command[] amendments = { Command.ina, Command.inc, Command.ing,
-								   Command.ist, Command.del };
-
 	// Copy mode on/off
 	private boolean copy;
 	// The strand to which this enzyme is currently bound
@@ -83,8 +76,15 @@ public class Enzyme extends AbstractProtein {
 		complement = new Strand();
 		// 3) The base to which it is currently bound
 		binding = strand.indexOf(getBindingBase()); // TODO this should be random?
-
 		// Each amino acid will affect at least one of the variables above
+
+		final Command[] movements = { Command.mvr, Command.mvl, Command.rpy,
+									  Command.rpu, Command.lpy, Command.lpu,
+									  Command.swi };
+
+		final Command[] amendments = { Command.ina, Command.inc, Command.ing,
+									   Command.ist, Command.del };
+
 		for (int i = 0; i < size(); i++) {
 
 			if (!isAttached()) {
@@ -120,7 +120,7 @@ public class Enzyme extends AbstractProtein {
 		return products;
 	}
 
-	private int move(Command command) {
+	private void move(Command command) {
 		// mvr - move one unit to the right
 		// mvl - move one unit to the left
 		// rpy - search for the nearest pyrimidine to the right
@@ -131,6 +131,7 @@ public class Enzyme extends AbstractProtein {
 
 		if (command == Command.mvr) {
 			binding++;
+
 			if (copy && isAttached()) {
 				Base current = strand.get(binding);
 				complement.add(current.getComplement());
@@ -138,44 +139,80 @@ public class Enzyme extends AbstractProtein {
 		}
 		else if (command == Command.mvl) {
 			binding--;
+
 			if (copy && isAttached()) {
 				Base current = strand.get(binding);
 				complement.add(current.getComplement());
 			}
 		}
 		else if (command == Command.rpy) {
-			Base current = strand.get(++binding);
-			while (current.getDerivative() != Derivative.pyrimidine) {
-				current = strand.get(++binding);
-			}
-			if (copy) {
+			while(true) {
+				binding++;
+
+				if (isAttached()) {
+					Base current = strand.get(binding);
+					if (copy) {
+						complement.add(current.getComplement());
+					}
+					if (current.getDerivative() == Derivative.pyrimidine) {
+						return;
+					}
+				} else {
+					return;
+				}
 			}
 		}
 		else if (command == Command.rpu) {
-			Base current = strand.get(++binding);
-			while (current.getDerivative() != Derivative.purine) {
-				current = strand.get(++binding);
-			}
-			if (copy) {
+			while(true) {
+				binding++;
+
+				if (isAttached()) {
+					Base current = strand.get(binding);
+					if (copy) {
+						complement.add(current.getComplement());
+					}
+					if (current.getDerivative() == Derivative.purine) {
+						return;
+					}
+				} else {
+					return;
+				}
 			}
 		}
 		else if (command == Command.lpy) {
-			Base current = strand.get(--binding);
-			while (current.getDerivative() != Derivative.pyrimidine) {
-				current = strand.get(--binding);
-			}
-			if (copy) {
+			while(true) {
+				binding--;
+
+				if (isAttached()) {
+					Base current = strand.get(binding);
+					if (copy) {
+						complement.add(0, current.getComplement());
+					}
+					if (current.getDerivative() == Derivative.pyrimidine) {
+						return;
+					}
+				} else {
+					return;
+				}
 			}
 		}
 		else if (command == Command.lpu) {
-			Base current = strand.get(--binding);
-			while (current.getDerivative() != Derivative.purine) {
-				current = strand.get(--binding);
-			}
-			if (copy) {
+			while(true) {
+				binding--;
+
+				if (isAttached()) {
+					Base current = strand.get(binding);
+					if (copy) {
+						complement.add(0, current.getComplement());
+					}
+					if (current.getDerivative() == Derivative.purine) {
+						return;
+					}
+				} else {
+					return;
+				}
 			}
 		}
-		return binding;
 	}
 
 	private Protein amend(Command command) {
@@ -198,13 +235,21 @@ public class Enzyme extends AbstractProtein {
 		return new Protein();
 	}
 
+	public String getCommands() {
+		String commands = "";
+		for (int i = 0; i < size(); i++) {
+			commands += get(i).getCommand() + " ";
+		}
+		return commands;
+	}
+
 	private void consolePrint(Command command) {
 		System.out.print("Copy " + (copy ? "on" : "off"));
 		System.out.println(", executing " + command);
 		System.out.print(strand);
 		System.out.println("  " + complement);
 
-		for (int j = 0; j < binding; j++) {
+		for (int i = 0; i < binding; i++) {
 			System.out.print("   ");
 		}
 		System.out.println(" |\n");

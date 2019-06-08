@@ -22,6 +22,11 @@ public class Strand extends AbstractList<Base> {
 	}
 
 	@Override
+	public void add(int index, Base base) {
+		sequence.add(index, base);
+	}
+
+	@Override
 	public boolean add(Base base) {
 		return sequence.add(base);
 	}
