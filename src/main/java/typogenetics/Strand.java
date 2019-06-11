@@ -1,5 +1,6 @@
 package typogenetics;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.AbstractList;
@@ -36,6 +37,15 @@ public class Strand extends AbstractList<Base> {
 		return sequence.size();
 	}
 
+	@Override
+	public Base remove(int index) {
+		return sequence.remove(index);
+	}
+
+	public void reverse() {
+		Collections.reverse(sequence);
+	}
+
 	public int indexOf(Base base) {
 		for (int i = 0; i < sequence.size(); i++) {
 			if (base.toString().equals(sequence.get(i).toString())) {
@@ -43,6 +53,20 @@ public class Strand extends AbstractList<Base> {
 			}
 		}
 		return -1;
+	}
+
+	public String toString() {
+		List<Base> copy = new ArrayList<>(sequence);
+		copy.removeAll(Collections.singleton(null));
+		return copy.toString();
+	}
+
+	public Strand emptyClone() {
+		Strand complement = new Strand();
+		for (int i = 0; i < size(); i++) {
+			complement.add(null);
+		}
+		return complement;
 	}
 
 	public static List<Base> parseStrand(String string) {

@@ -2,7 +2,6 @@ package typogenetics;
 
 import static org.junit.Assert.*;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import java.util.List;
 
@@ -18,7 +17,6 @@ public class EnzymeTest {
 	}
 
 	@Test
-	@Ignore
 	public void moveRightTest() {
 		Strand strand = new Strand("CGCACACACTCT");
 		Enzyme enzyme = Ribosome.translate(strand, Enzyme.class).get(0);
@@ -29,7 +27,6 @@ public class EnzymeTest {
 	}
 
 	@Test
-	@Ignore
 	public void moveLeftTest() {
 		Strand strand = new Strand("CTCGCCCC");
 		Enzyme enzyme = Ribosome.translate(strand, Enzyme.class).get(0);
@@ -40,39 +37,111 @@ public class EnzymeTest {
 	}
 
 	@Test
-	@Ignore
 	public void searchRightTest() {
 		// Search right pyrimidine
 		Strand strand = new Strand("CGTACGCTCT");
 		Enzyme enzyme = Ribosome.translate(strand, Enzyme.class).get(0);
 		List<Strand> strands = enzyme.bind(strand);
 
-		assertEquals("[C, A]", strands.get(1).toString());
+		assertEquals("[A, C]", strands.get(1).toString());
 
 		// Search right purine
 		strand = new Strand("CGTCCGCT");
 		enzyme = Ribosome.translate(strand, Enzyme.class).get(0);
 		strands = enzyme.bind(strand);
 
-		assertEquals("[G, G, C]", strands.get(1).toString());
+		assertEquals("[C, G, G]", strands.get(1).toString());
 	}
 
 	@Test
-	@Ignore
 	public void searchLeftTest() {
 		// Search left pyrimidine
 		Strand strand = new Strand("CGTGCGCT");
 		Enzyme enzyme = Ribosome.translate(strand, Enzyme.class).get(0);
 		List<Strand> strands = enzyme.bind(strand);
 
-		assertEquals("[G, C]", strands.get(1).toString());
+		assertEquals("[C, G]", strands.get(1).toString());
 
 		// Search left purine
 		strand = new Strand("AACTCTCGTTCG");
 		enzyme = Ribosome.translate(strand, Enzyme.class).get(0);
 		strands = enzyme.bind(strand);
 
-		assertEquals("[T, G, A, G, A, G]", strands.get(1).toString());
+		assertEquals("[G, A, G, A, G, T]", strands.get(1).toString());
+	}
+
+	@Test
+	public void insertTest() throws Exception {
+		// Insert A
+		Strand strand = new Strand("GACT");
+		Enzyme enzyme = Ribosome.translate(strand, Enzyme.class).get(0);
+		List<Strand> strands = enzyme.bind(strand);
+
+		assertEquals("[G, A, C, A, T]", strands.get(0).toString());
+
+		// Insert C
+		strand = new Strand("GCCT");
+		enzyme = Ribosome.translate(strand, Enzyme.class).get(0);
+		strands = enzyme.bind(strand);
+
+		assertEquals("[G, C, C, T, C]", strands.get(0).toString());
+
+		// Insert G
+		strand = new Strand("CTGG");
+		enzyme = Ribosome.translate(strand, Enzyme.class).get(0);
+		strands = enzyme.bind(strand);
+
+		assertEquals("[C, T, G, G, G]", strands.get(0).toString());
+
+		// Insert T
+		strand = new Strand("CTGTCT");
+		enzyme = Ribosome.translate(strand, Enzyme.class).get(0);
+		strands = enzyme.bind(strand);
+
+		assertEquals("[C, T, T, G, T, C, T]", strands.get(0).toString());
+	}
+
+	@Test
+	public void insertCopyTest() throws Exception {
+		// Insert A with copy on
+		Strand strand = new Strand("CGGACG");
+		Enzyme enzyme = Ribosome.translate(strand, Enzyme.class).get(0);
+		List<Strand> strands = enzyme.bind(strand);
+
+		assertEquals("[C, G, G, A, A, C, G]", strands.get(0).toString());
+		assertEquals("[T]", strands.get(1).toString());
+	}
+
+
+	@Test
+	public void insertCopyMultipleTest() throws Exception {
+		// Insert A with copy on
+		Strand strand = new Strand("CGGAGCCG");
+		Enzyme enzyme = Ribosome.translate(strand, Enzyme.class).get(0);
+		List<Strand> strands = enzyme.bind(strand);
+
+		assertEquals("[C, G, A, C, G, A, G, C, C, G]", strands.get(0).toString());
+		assertEquals("[G, T]", strands.get(1).toString());
+	}
+
+
+	@Test
+	public void deleteTest() {
+		Strand strand = new Strand("CGAGCG");
+		Enzyme enzyme = Ribosome.translate(strand, Enzyme.class).get(0);
+		List<Strand> strands = enzyme.bind(strand);
+
+		assertEquals("[C, G, G, C, G]", strands.get(0).toString());
+	}
+
+	@Test
+	public void deleteCopyTest() {
+		Strand strand = new Strand("CGGAAGCG");
+		Enzyme enzyme = Ribosome.translate(strand, Enzyme.class).get(0);
+		List<Strand> strands = enzyme.bind(strand);
+
+		assertEquals("[C, G, G, A, A, G, C, G]", strands.get(0).toString());
+		assertEquals("[]", strands.get(1).toString());
 	}
 
 	@Test
