@@ -61,6 +61,14 @@ public class Strand extends AbstractList<Base> {
 		return copy.toString();
 	}
 
+	public Strand clone() {
+		Strand copy = new Strand();
+		for (Base base : sequence) {
+			copy.add(base);
+		}
+		return copy;
+	}
+
 	public Strand emptyClone() {
 		Strand complement = new Strand();
 		for (int i = 0; i < size(); i++) {

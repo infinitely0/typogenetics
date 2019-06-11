@@ -2,6 +2,7 @@ package typogenetics;
 
 import static org.junit.Assert.*;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import java.util.List;
 
@@ -142,6 +143,32 @@ public class EnzymeTest {
 
 		assertEquals("[C, G, G, A, A, G, C, G]", strands.get(0).toString());
 		assertEquals("[]", strands.get(1).toString());
+	}
+
+	@Test
+	public void switchTest() {
+		Strand strand = new Strand("ATCTGAGCCT");
+		Enzyme enzyme = Ribosome.translate(strand, Enzyme.class).get(0);
+		List<Strand> strands = enzyme.bind(strand);
+
+		assertEquals("[A, T, C, T, G, A, G, C, C, T]", strands.get(1).toString());
+		assertEquals("[A, C]", strands.get(0).toString());
+	}
+
+	@Test
+	@Ignore
+	public void nopeTest() {
+		Strand strand = new Strand("CTAGATCACCCGCTGAGCGGGTTATCTGTT");
+		Enzyme enzyme = Ribosome.translate(strand, Enzyme.class).get(0);
+
+		System.out.println(enzyme.getCommands());
+
+		List<Strand> strands = enzyme.bind(strand);
+
+		System.out.print(strands);
+
+		assertEquals(1, 0);
+
 	}
 
 	@Test
