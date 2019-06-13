@@ -28,6 +28,11 @@ public class Strand extends AbstractList<Base> {
 	}
 
 	@Override
+	public Base set(int index, Base base) {
+		return sequence.set(index, base);
+	}
+
+	@Override
 	public boolean add(Base base) {
 		return sequence.add(base);
 	}
@@ -42,15 +47,26 @@ public class Strand extends AbstractList<Base> {
 		return sequence.remove(index);
 	}
 
+	@Override
+	public boolean isEmpty() {
+		for (int i = 0; i < sequence.size(); i++) {
+			if (sequence.get(i) != null)
+				return false;
+		}
+		return true;
+	}
+
 	public void reverse() {
 		Collections.reverse(sequence);
 	}
 
 	public int indexOf(Base base) {
 		for (int i = 0; i < sequence.size(); i++) {
-			if (base.toString().equals(sequence.get(i).toString())) {
+			Base next = sequence.get(i);
+			if (next == null)
+				continue;
+			else if (base.toString().equals(next.toString()))
 				return i;
-			}
 		}
 		return -1;
 	}

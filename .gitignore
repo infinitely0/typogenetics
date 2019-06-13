@@ -23,7 +23,16 @@
 hs_err_pid*
 
 workbench.xmi
-
-/bin/
-
+.metadata
+.classpath
+.project
+.settings/
+bin/
+tmp/
+*.tmp
+*.bak
 *.swp
+*~.nib
+local.properties
+.loadpath
+

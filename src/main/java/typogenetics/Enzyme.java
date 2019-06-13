@@ -2,6 +2,7 @@ package typogenetics;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import typogenetics.AminoAcid.Command;
@@ -18,6 +19,8 @@ public class Enzyme extends AbstractProtein {
 	private int binding;
 	// The complementary strand
 	private Strand complement;
+
+	private HashMap<String, String> options = new HashMap<>();
 
 	// Binding preference of this enzyme based on tertiary structure
 	public Base getBindingBase() {
@@ -65,7 +68,7 @@ public class Enzyme extends AbstractProtein {
 		return bindingBase;
 	}
 
-	// Bind to a strand and perform operations of amino acids
+	// Bind to a strand and execute amino acids commands
 	public List<Strand> bind(Strand input) {
 		// While the enzyme works on the protein the following are tracked.
 		// 1) Whether copy mode is on or off
@@ -78,24 +81,33 @@ public class Enzyme extends AbstractProtein {
 		binding = strand.indexOf(getBindingBase()); // TODO this should be random?
 		// Each amino acid will affect at least one of the variables above
 
-		final Command[] movements = { Command.mvr, Command.mvl, Command.rpy,
-									  Command.rpu, Command.lpy, Command.lpu };
+		final Command[] movements = { Command.mvr, Command.mvl };
+
+		final Command[] searches = { Command.rpy, Command.rpu,
+									 Command.lpy, Command.lpu };
 
 		final Command[] amendments = { Command.ina, Command.inc, Command.ing,
 									   Command.ist };
 
 		for (int i = 0; i < size(); i++) {
 
-			if (!isAttached()) {
-				return finaliseStrands();
-			}
+			if (!isAttached())
+				return isolateStrands();
 
 			Command command = get(i).getCommand();
-			consolePrint(command);
+
+			if (Boolean.parseBoolean(options.get("output"))) {
+				consolePrint();
+				System.out.print("Copy " + (copy ? "on" : "off"));
+				System.out.println(", executing " + command);
+			}
 
 			// movement commands
 			if (Arrays.asList(movements).contains(command)) {
 				move(command);
+			// search commands
+			} else if (Arrays.asList(searches).contains(command)) {
+				search(command);
 			// insert commands
 			} else if (Arrays.asList(amendments).contains(command)) {
 				insert(command);
@@ -116,121 +128,72 @@ public class Enzyme extends AbstractProtein {
 			}
 		}
 
-		return finaliseStrands();
+		if (Boolean.parseBoolean(options.get("output")))
+			consolePrint();
+
+		return isolateStrands();
+	}
+
+	public String getCommands() {
+		String commands = "";
+		for (int i = 0; i < size(); i++) {
+			commands += get(i).getCommand() + " ";
+		}
+		return commands;
+	}
+
+	public void setOption(String key, String value) {
+		options.put(key, value);
 	}
 
 	// Move commands:
 	// mvr - move one unit to the right
 	// mvl - move one unit to the left
+	private void move(Command command) {
+		if (command == Command.mvr)
+			binding++;
+		else if (command == Command.mvl)
+			binding--;
+
+		if (copy && isAttached() && isOnBase()) {
+			Base current = strand.get(binding);
+			complement.set(binding, current.getComplement());
+		}
+	}
+
+	// Search commands:
 	// rpy - search for the nearest pyrimidine to the right
 	// rpu - search for the nearest purine to the right
 	// lpy - search for the nearest pyrimidine to the left
 	// lpu - search for the nearest purine to the left
-	private void move(Command command) {
-		if (command == Command.mvr) {
-			binding++;
-
-			if (copy && isAttached() && isOnBase()) {
-				Base current = strand.get(binding);
-				complement.add(binding, current.getComplement());
-			}
-		}
-		else if (command == Command.mvl) {
-			binding--;
-
-			if (copy && isAttached() && isOnBase()) {
-				Base current = strand.get(binding);
-				complement.add(binding, current.getComplement());
-			}
-		}
-		else if (command == Command.rpy) {
-			while(true) {
-				binding++;
-
-				if (!isAttached())
-					return;
-
-				if (copy && isOnBase()) {
-					Base current = strand.get(binding);
-					complement.add(binding, current.getComplement());
-
-					if (current.getDerivative() == Derivative.pyrimidine) {
-						return;
-					}
-				}
-			}
-		}
-		else if (command == Command.rpu) {
-			while(true) {
-				binding++;
-
-				if (!isAttached())
-					return;
-
-				if (copy && isOnBase()) {
-					Base current = strand.get(binding);
-					complement.add(binding, current.getComplement());
-
-					if (current.getDerivative() == Derivative.purine) {
-						return;
-					}
-				}
-			}
-		}
-		else if (command == Command.lpy) {
-			while(true) {
-				binding--;
-
-				if (!isAttached())
-					return;
-
-				if (copy && isOnBase()) {
-					Base current = strand.get(binding);
-					complement.add(binding, current.getComplement());
-
-					if (current.getDerivative() == Derivative.pyrimidine) {
-						return;
-					}
-				}
-			}
-		}
-		else if (command == Command.lpu) {
-			while(true) {
-				binding--;
-
-				if (!isAttached())
-					return;
-
-				if (copy && isOnBase()) {
-					Base current = strand.get(binding);
-					complement.add(binding, current.getComplement());
-
-					if (current.getDerivative() == Derivative.purine) {
-						return;
-					}
-				}
-			}
+	private void search(Command command) {
+		switch (command) {
+			case rpy: searchFor(Direction.r, Derivative.pyrimidine); break;
+			case rpu: searchFor(Direction.r, Derivative.purine); break;
+			case lpy: searchFor(Direction.l, Derivative.pyrimidine); break;
+			case lpu: searchFor(Direction.l, Derivative.purine); break;
+			default: ;
 		}
 	}
 
-	// del - delete base from strand
-	private void delete() {
-		strand.remove(binding);
-		complement.remove(binding);
-	}
+	private void searchFor(Direction direction, Derivative derivative) {
+		while(true) {
+			if (direction == Direction.r)
+				binding++;
+			else if (direction == Direction.l)
+				binding--;
 
-	// swi - switch enzyme to other strand
-	private void swi() {
-		Strand strandCopy = strand.clone();
-		Strand complementCopy = complement.clone();
+			if (!isAttached())
+				break;
 
-		strand = complementCopy;
-		complement = strandCopy;
+			Base current = strand.get(binding);
+			if (copy && isOnBase()) {
+				complement.set(binding, current.getComplement());
+			}
 
-		strand.reverse();
-		complement.reverse();
-
-		binding = strand.size() - binding - 1;
+			if (current.getDerivative() == derivative)
+				break;
+		}
 	}
 
 	// Insert commands:
@@ -250,27 +213,44 @@ public class Enzyme extends AbstractProtein {
 		}
 
 		binding++;
-		insert(strand, base);
+		insertBase(strand, base);
 		if (copy)
-			insert(complement, base.getComplement());
+			insertBase(complement, base.getComplement());
+		else
+			complement.add(null); // Padding to keep strands same length
 	}
 
-	private void insert(Strand strand, Base base) {
+	private void insertBase(Strand strand, Base base) {
 		if (binding == strand.size())
 			strand.add(base);
 		else
 			strand.add(binding, base);
 	}
 
-	public String getCommands() {
-		String commands = "";
-		for (int i = 0; i < size(); i++) {
-			commands += get(i).getCommand() + " ";
-		}
-		return commands;
+	// del - delete base from strand
+	private void delete() {
+		strand.remove(binding);
+		if (copy)
+			complement.remove(binding);
+		else
+			strand.add(null); // Padding to keep strands same length 
 	}
 
-	private void consolePrint(Command command) {
+	// swi - switch enzyme to other strand
+	private void swi() {
+		Strand strandCopy = strand.clone();
+		Strand complementCopy = complement.clone();
+
+		strand = complementCopy;
+		complement = strandCopy;
+
+		strand.reverse();
+		complement.reverse();
+
+		binding = strand.size() - binding - 1;
+	}
+
+	private void consolePrint() {
 		String complementString = "-";
 		for (int i = 0; i < complement.size(); i++) {
 			if (complement.get(i) == null)
@@ -278,7 +258,7 @@ public class Enzyme extends AbstractProtein {
 			else
 				complementString += complement.get(i) + "-";
 		}
-		System.out.println(complementString);
+		System.out.println("\n" + complementString);
 
 		String strandString = "-";
 		for (int i = 0; i < strand.size(); i++) {
@@ -293,10 +273,7 @@ public class Enzyme extends AbstractProtein {
 		for (int i = 0; i < binding; i++) {
 			bindingString += "  ";
 		}
-		System.out.println(bindingString + "|");
-
-		System.out.print("Copy " + (copy ? "on" : "off"));
-		System.out.println(", executing " + command);
+		System.out.println(bindingString + "|\n");
 	}
 
 	// If false, enzyme has "fallen off" or failed to attach
@@ -313,18 +290,38 @@ public class Enzyme extends AbstractProtein {
 			return true;
 	}
 
-	private List<Strand> finaliseStrands() {
+	private List<Strand> isolateStrands() {
 		List<Strand> products = new ArrayList<>();
 
-		if (!strand.isEmpty())
-			products.add(strand);
+		if (!strand.isEmpty()) {
+			addSeparateStrands(strand, products);
+		}
 
 		if (!complement.isEmpty()) {
 			complement.reverse();
-			products.add(complement);
+			addSeparateStrands(complement, products);
 		}
 
 		return products;
+	}
+
+	private void addSeparateStrands(Strand source, List<Strand> destination) {
+		Strand segment = new Strand();
+
+		for (Base base : source) {
+			if (base == null) {
+				if (!segment.isEmpty()) {
+					destination.add(segment);
+				}
+				segment = new Strand();
+			}
+			else {
+				segment.add(base);
+			}
+		}
+
+		if (!segment.isEmpty())
+			destination.add(segment);
 	}
 
 }

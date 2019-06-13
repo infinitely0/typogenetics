@@ -20,6 +20,8 @@ public final class Ribosome {
 		for (int i = 0; i < strand.size(); i++) {
 			Base first = strand.get(i);
 
+			// TODO refactor this to just remove last base when odd
+
 			try {
 				Base second = strand.get(++i);
 				AminoAcid aa = new AminoAcid(first, second);
