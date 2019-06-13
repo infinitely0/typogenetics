@@ -19,6 +19,8 @@ public class Enzyme extends AbstractProtein {
 	private int binding;
 	// The complementary strand
 	private Strand complement;
+	// The strands yielded by the enzyme
+	private List<Strand> products = new ArrayList<>();
 
 	private HashMap<String, String> options = new HashMap<>();
 
@@ -91,8 +93,10 @@ public class Enzyme extends AbstractProtein {
 
 		for (int i = 0; i < size(); i++) {
 
-			if (!isAttached())
-				return isolateStrands();
+			if (!isAttached()) {
+				isolateStrands();
+				return products;
+			}
 
 			Command command = get(i).getCommand();
 
@@ -122,6 +126,7 @@ public class Enzyme extends AbstractProtein {
 				copy = false;
 			// cut - cut strands
 			} else if (command == Command.cut) {
+				cut();
 			// swi - switch enzyme to other strand
 			} else if (command == Command.swi) {
 				swi();
@@ -131,7 +136,8 @@ public class Enzyme extends AbstractProtein {
 		if (Boolean.parseBoolean(options.get("output")))
 			consolePrint();
 
-		return isolateStrands();
+		isolateStrands();
+		return products;
 	}
 
 	public String getCommands() {
@@ -236,6 +242,15 @@ public class Enzyme extends AbstractProtein {
 			strand.add(null); // Padding to keep strands same length 
 	}
 
+	// cut - cut strands
+	private void cut() {
+		strand = replaceSegments(strand);
+		if (copy) {
+			complement = replaceSegments(complement);
+		}
+
+	}
+
 	// swi - switch enzyme to other strand
 	private void swi() {
 		Strand strandCopy = strand.clone();
@@ -290,28 +305,24 @@ public class Enzyme extends AbstractProtein {
 			return true;
 	}
 
-	private List<Strand> isolateStrands() {
-		List<Strand> products = new ArrayList<>();
-
+	private void isolateStrands() {
 		if (!strand.isEmpty()) {
-			addSeparateStrands(strand, products);
+			findSegments(strand);
 		}
 
 		if (!complement.isEmpty()) {
 			complement.reverse();
-			addSeparateStrands(complement, products);
+			findSegments(complement);
 		}
-
-		return products;
 	}
 
-	private void addSeparateStrands(Strand source, List<Strand> destination) {
+	private void findSegments(Strand source) {
 		Strand segment = new Strand();
 
 		for (Base base : source) {
 			if (base == null) {
 				if (!segment.isEmpty()) {
-					destination.add(segment);
+					products.add(segment);
 				}
 				segment = new Strand();
 			}
@@ -321,7 +332,34 @@ public class Enzyme extends AbstractProtein {
 		}
 
 		if (!segment.isEmpty())
-			destination.add(segment);
+			products.add(segment);
+	}
+
+	// When a strand is cut, strands to the right of the enzyme are released
+	// This is done by replacing them with nulls after isolating them
+	private Strand replaceSegments(Strand source) {
+		Strand segment = new Strand();
+
+		int from = binding + 1;
+		for (int i = from; i < source.size(); i++) {
+			Base base = source.get(i);
+
+			if (base == null) {
+				if (!segment.isEmpty()) {
+					products.add(segment);
+				}
+				segment = new Strand();
+			}
+			else {
+				segment.add(base);
+				source.set(i, null);
+			}
+		}
+
+		if (!segment.isEmpty())
+			products.add(segment);
+
+		return source;
 	}
 
 }

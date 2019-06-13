@@ -156,16 +156,25 @@ public class EnzymeTest {
 	}
 
 	@Test
+	public void cutTest() {
+		Strand strand = new Strand("GCAC");
+		Enzyme enzyme = Ribosome.translate(strand, Enzyme.class).get(0);
+		List<Strand> strands = enzyme.bind(strand);
+
+		assertEquals("[A, C]", strands.get(0).toString());
+		assertEquals("[G, C, C]", strands.get(1).toString());
+	}
+
+	@Test
 	@Ignore
 	public void nopeTest() {
-		Strand strand = new Strand("CTAGATCACCCGCTGAGCGGGTTATCTGTT");
+		Strand strand = new Strand("CGGAGCTATAATGAGCAC");
 		Enzyme enzyme = Ribosome.translate(strand, Enzyme.class).get(0);
-
-		System.out.println(enzyme.getCommands());
+		enzyme.setOption("output", "true");
 
 		List<Strand> strands = enzyme.bind(strand);
 
-		System.out.print(strands);
+		System.out.println(strands);
 
 		assertEquals(1, 0);
 	}
@@ -177,7 +186,6 @@ public class EnzymeTest {
 
 		Enzyme enzyme = Ribosome.translate(
 				new Strand("ATGA"), Enzyme.class).get(0);
-		enzyme.setOption("output", "true");
 
 		List<Strand> strands = enzyme.bind(strand);
 
