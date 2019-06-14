@@ -17,14 +17,14 @@ public final class Ribosome {
 			throw new IllegalArgumentException("Invalid protein type");
 		}
 
-		if (strand.size() % 2 == 1 ) {
+		if (strand.size() % 2 == 1) {
 			strand.remove(strand.size() - 1);
 		}
 
 		for (int i = 0; i < strand.size(); i++) {
 			Base first = strand.get(i);
-
 			Base second = strand.get(++i);
+
 			AminoAcid aa = new AminoAcid(first, second);
 
 			if (aa.getCommand() == AminoAcid.Command.spa) {

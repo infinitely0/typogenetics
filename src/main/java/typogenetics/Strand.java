@@ -14,7 +14,8 @@ public class Strand extends AbstractList<Base> {
 	}
 
 	public Strand(String sequence) {
-		this.sequence = parseStrand(sequence);
+		String formatted = formatStrand(sequence);
+		this.sequence = parseStrand(formatted);
 	}
 
 	@Override
@@ -60,13 +61,18 @@ public class Strand extends AbstractList<Base> {
 		Collections.reverse(sequence);
 	}
 
-	public int indexOf(Base base) {
+	public int indexOf(Base base, int offset) {
 		for (int i = 0; i < sequence.size(); i++) {
 			Base next = sequence.get(i);
-			if (next == null)
+			if (next == null) {
 				continue;
-			else if (base.toString().equals(next.toString()))
-				return i;
+			}
+			else if (base.toString().equals(next.toString())) {
+				if (offset == 0)
+					return i;
+				else
+					offset -= 1;
+			}
 		}
 		return -1;
 	}
@@ -75,6 +81,15 @@ public class Strand extends AbstractList<Base> {
 		List<Base> copy = new ArrayList<>(sequence);
 		copy.removeAll(Collections.singleton(null));
 		return copy.toString();
+	}
+
+	public static String formatStrand(String strand) {
+		return strand.replace(",", "")
+					 .replace("[", "")
+					 .replace("]", "")
+					 .replace(" ", "")
+					 .trim()
+					 .toUpperCase();
 	}
 
 	public Strand clone() {

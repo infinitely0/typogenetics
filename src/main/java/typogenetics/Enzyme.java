@@ -70,8 +70,13 @@ public class Enzyme extends AbstractProtein {
 		return bindingBase;
 	}
 
-	// Bind to a strand and execute amino acids commands
+	// Bind to strand at default position - the left-most base
 	public List<Strand> bind(Strand input) {
+		return bind(input, 0);
+	}
+
+	// Bind to a strand and execute amino acids commands
+	public List<Strand> bind(Strand input, int offset) {
 		// While the enzyme works on the protein the following are tracked.
 		// 1) Whether copy mode is on or off
 		copy = false;
@@ -79,9 +84,8 @@ public class Enzyme extends AbstractProtein {
 		strand = input;
 		// 3) The complementary strand (if there is one)
 		complement = strand.emptyClone();
-		// 3) The base to which it is currently bound
-		binding = strand.indexOf(getBindingBase()); // TODO this should be random?
-		// Each amino acid will affect at least one of the variables above
+		// 3) The position of the base on which it is currently bound
+		binding = setInitialBinding(offset);
 
 		final Command[] movements = { Command.mvr, Command.mvl };
 
@@ -120,7 +124,7 @@ public class Enzyme extends AbstractProtein {
 				delete();
 			// cop - turn on copy mode
 			} else if (command == Command.cop) {
-				copy = true;
+				setCopyMode();
 			// off - turn off copy mode
 			} else if (command == Command.off) {
 				copy = false;
@@ -143,13 +147,38 @@ public class Enzyme extends AbstractProtein {
 	public String getCommands() {
 		String commands = "";
 		for (int i = 0; i < size(); i++) {
-			commands += get(i).getCommand() + " ";
+			commands += get(i).getCommand() + "-";
 		}
+		commands = commands.substring(0, commands.length() - 1);
 		return commands;
 	}
 
+	// Enzyme options
+	//
+	// setOption("output", "true")
+	// Prints strands after each command has been executed
 	public void setOption(String key, String value) {
 		options.put(key, value);
+	}
+
+	// cop - turn on copy mode
+	private void setCopyMode() {
+		if (copy) {
+			return;
+		} else {
+			Base current = strand.get(binding);
+			complement.set(binding, current.getComplement());
+
+			copy = true;
+		}
+	}
+
+	// Each enzyme has a binding preference (i.e. the type of base on which it
+	// can bind) determined by its ternary structure. Because there may be more
+	// than one of these bases in the strand, a non-default base (the default
+	// being the left-most one) can be specified.
+	private int setInitialBinding(int offset) {
+		 return strand.indexOf(getBindingBase(), offset);
 	}
 
 	// Move commands:
@@ -192,13 +221,14 @@ public class Enzyme extends AbstractProtein {
 			if (!isAttached())
 				break;
 
-			Base current = strand.get(binding);
-			if (copy && isOnBase()) {
-				complement.set(binding, current.getComplement());
-			}
+			if (isOnBase()) {
+				Base current = strand.get(binding);
+				if (copy)
+					complement.set(binding, current.getComplement());
 
-			if (current.getDerivative() == derivative)
-				break;
+				if (current.getDerivative() == derivative)
+					break;
+			}
 		}
 	}
 
@@ -298,11 +328,7 @@ public class Enzyme extends AbstractProtein {
 
 	// If false, enzyme is not attached to a base (usually after a switch)
 	private boolean isOnBase() {
-		Base base = strand.get(binding);
-		if (base == null)
-			return false;
-		else
-			return true;
+		return (strand.get(binding) != null);
 	}
 
 	private void isolateStrands() {

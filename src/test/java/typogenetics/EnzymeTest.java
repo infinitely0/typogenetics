@@ -14,62 +14,61 @@ public class EnzymeTest {
 		Strand strand = new Strand("CACACACAAT");
 		Enzyme enzyme = Ribosome.translate(strand, Enzyme.class).get(0);
 
-		assertEquals(enzyme.get(0).toString(),
-				new AminoAcid(strand.get(0), strand.get(1)).toString());
+		assertEquals(enzyme.get(0).toString(), "CA");
 	}
 
 	@Test
 	public void moveRightTest() {
-		Strand strand = new Strand("CGCACACACTCT");
+		Strand strand = new Strand("CAGT");
 		Enzyme enzyme = Ribosome.translate(strand, Enzyme.class).get(0);
 		List<Strand> strands = enzyme.bind(strand);
 
-		assertEquals("[C, G, C, A, C, A, C, A, C, T, C, T]", strands.get(0).toString());
-		assertEquals("[G, T, G]", strands.get(1).toString());
+		assertEquals("[C, A, T, G, T]", strands.get(0).toString());
 	}
 
 	@Test
 	public void moveLeftTest() {
-		Strand strand = new Strand("CTCGCCCC");
+		Strand strand = new Strand("GACCGT");
 		Enzyme enzyme = Ribosome.translate(strand, Enzyme.class).get(0);
 		List<Strand> strands = enzyme.bind(strand);
 
-		assertEquals("[C, T, C, G, C, C, C, C]", strands.get(0).toString());
-		assertEquals("[G]", strands.get(1).toString());
+		assertEquals("[G, A, C, T, A, C, G, T]", strands.get(0).toString());
 	}
 
 	@Test
-	public void searchRightTest() {
-		// Search right pyrimidine
-		Strand strand = new Strand("CGTACGCTCT");
+	public void searchRightPyrimidineTest() {
+		Strand strand = new Strand("CTTAGA");
 		Enzyme enzyme = Ribosome.translate(strand, Enzyme.class).get(0);
 		List<Strand> strands = enzyme.bind(strand);
 
-		assertEquals("[A, C]", strands.get(1).toString());
-
-		// Search right purine
-		strand = new Strand("CGTCCGCT");
-		enzyme = Ribosome.translate(strand, Enzyme.class).get(0);
-		strands = enzyme.bind(strand);
-
-		assertEquals("[C, G, G]", strands.get(1).toString());
+		assertEquals("[C, T, T, A, A, G, A]", strands.get(0).toString());
 	}
 
 	@Test
-	public void searchLeftTest() {
-		// Search left pyrimidine
-		Strand strand = new Strand("CGTGCGCT");
+	public void searchRightPurineTest() {
+		Strand strand = new Strand("CTTCGT");
 		Enzyme enzyme = Ribosome.translate(strand, Enzyme.class).get(0);
 		List<Strand> strands = enzyme.bind(strand);
 
-		assertEquals("[C, G]", strands.get(1).toString());
+		assertEquals("[C, T, T, C, G, T, T]", strands.get(0).toString());
+	}
 
-		// Search left purine
-		strand = new Strand("AACTCTCGTTCG");
-		enzyme = Ribosome.translate(strand, Enzyme.class).get(0);
-		strands = enzyme.bind(strand);
+	@Test
+	public void searchLeftPyrimidineTest() {
+		Strand strand = new Strand("CTTGGA");
+		Enzyme enzyme = Ribosome.translate(strand, Enzyme.class).get(0);
+		List<Strand> strands = enzyme.bind(strand);
 
-		assertEquals("[G, A, G, A, G, T]", strands.get(1).toString());
+		assertEquals("[C, T, T, A, G, G, A]", strands.get(0).toString());
+	}
+
+	@Test
+	public void searchLeftPurineTest() {
+		Strand strand = new Strand("CTTTGA");
+		Enzyme enzyme = Ribosome.translate(strand, Enzyme.class).get(0);
+		List<Strand> strands = enzyme.bind(strand);
+
+		assertEquals("[C, T, T, T, G, A, A]", strands.get(0).toString());
 	}
 
 	@Test
@@ -104,55 +103,52 @@ public class EnzymeTest {
 	}
 
 	@Test
-	public void insertCopyTest() throws Exception {
-		// Insert A with copy on
-		Strand strand = new Strand("CGGACG");
+	public void insertWithCopyOnTest() throws Exception {
+		Strand strand = new Strand("CGGA");
 		Enzyme enzyme = Ribosome.translate(strand, Enzyme.class).get(0);
 		List<Strand> strands = enzyme.bind(strand);
 
-		assertEquals("[C, G, G, A, A, C, G]", strands.get(0).toString());
-		assertEquals("[T]", strands.get(1).toString());
+		assertEquals("[C, A, G, G, A]", strands.get(0).toString());
+		assertEquals("[T, G]", strands.get(1).toString());
 	}
 
 
 	@Test
-	public void insertCopyMultipleTest() throws Exception {
-		// Insert A with copy on
+	public void insertMultipleWithCopyOnTest() throws Exception {
 		Strand strand = new Strand("CGGAGCCG");
 		Enzyme enzyme = Ribosome.translate(strand, Enzyme.class).get(0);
 		List<Strand> strands = enzyme.bind(strand);
 
 		assertEquals("[C, G, A, C, G, A, G, C, C, G]", strands.get(0).toString());
-		assertEquals("[G, T]", strands.get(1).toString());
+		assertEquals("[G, T, C]", strands.get(1).toString());
 	}
-
 
 	@Test
 	public void deleteTest() {
-		Strand strand = new Strand("CGAGCG");
+		Strand strand = new Strand("CTAG");
 		Enzyme enzyme = Ribosome.translate(strand, Enzyme.class).get(0);
 		List<Strand> strands = enzyme.bind(strand);
 
-		assertEquals("[C, G, G, C, G]", strands.get(0).toString());
+		assertEquals("[C, T, A]", strands.get(0).toString());
 	}
 
 	@Test
-	public void deleteCopyTest() {
-		Strand strand = new Strand("CGGAAGCG");
+	public void deleteWithCopyOnTest() {
+		Strand strand = new Strand("CGAG");
 		Enzyme enzyme = Ribosome.translate(strand, Enzyme.class).get(0);
 		List<Strand> strands = enzyme.bind(strand);
 
-		assertEquals("[C, G, G, A, A, G, C, G]", strands.get(0).toString());
+		assertEquals("[G, A, G]", strands.get(0).toString());
 	}
 
 	@Test
 	public void switchTest() {
-		Strand strand = new Strand("ATCTGAGCCT");
+		Strand strand = new Strand("ATGT");
 		Enzyme enzyme = Ribosome.translate(strand, Enzyme.class).get(0);
 		List<Strand> strands = enzyme.bind(strand);
 
-		assertEquals("[A, T, C, T, G, A, G, C, C, T]", strands.get(1).toString());
-		assertEquals("[A, C]", strands.get(0).toString());
+		assertEquals("[A, T, G, T]", strands.get(1).toString());
+		assertEquals("[T]", strands.get(0).toString());
 	}
 
 	@Test
@@ -166,17 +162,12 @@ public class EnzymeTest {
 	}
 
 	@Test
-	@Ignore
-	public void nopeTest() {
-		Strand strand = new Strand("CGGAGCTATAATGAGCAC");
+	public void offsetTest() {
+		Strand strand = new Strand("GAGC");
 		Enzyme enzyme = Ribosome.translate(strand, Enzyme.class).get(0);
-		enzyme.setOption("output", "true");
 
-		List<Strand> strands = enzyme.bind(strand);
-
-		System.out.println(strands);
-
-		assertEquals(1, 0);
+		List<Strand> strands = enzyme.bind(strand, 1);
+		assertEquals("[G, A, G, A, C, C]", strands.get(0).toString());
 	}
 
 	@Test
@@ -231,6 +222,29 @@ public class EnzymeTest {
 			Enzyme enzyme = Ribosome.translate(strand, Enzyme.class).get(0);
 			assertEquals(bindings2[i], enzyme.getBindingBase().toString());
 		}
+	}
+
+	@Test
+	@Ignore
+	public void bookTest() {
+		// This is the example process given in the book
+		// rpu-inc-cop-mvr-mvl-swi-lpu-ist
+		Strand enzymeStrand = new Strand("TCGCCGCACCATTTGT");
+		Enzyme enzyme = Ribosome.translate(enzymeStrand, Enzyme.class).get(0);
+		System.out.println(enzyme.getCommands());
+		enzyme.setOption("output", "true");
+
+		Strand strand = new Strand("TAGATCCAGTCCATCGA");
+		List<Strand> strands = enzyme.bind(strand, 1);
+
+		System.out.println(strands);
+		assertEquals("[A, T, G]", strands.get(1).toString());
+	}
+
+	@Ignore
+	@Test
+	public void nopeTest() {
+
 	}
 
 }
