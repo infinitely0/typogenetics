@@ -27,7 +27,6 @@ workbench.xmi
 .classpath
 .project
 .settings/
-bin/
 tmp/
 *.tmp
 *.bak
@@ -36,3 +35,4 @@ tmp/
 local.properties
 .loadpath
 
+/bin/

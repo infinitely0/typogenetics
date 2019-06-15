@@ -52,7 +52,10 @@ public class Enzyme extends AbstractProtein {
 			}
 		}
 
-		int relativeOrientation = Math.floorMod(rotation - orientation, 360);
+		// Orient entire protein relative to right (90 degrees)
+		int relativeOrientation =
+			Math.floorMod(rotation - orientation - 90, 360);
+
 		Base bindingBase;
 
 		if (relativeOrientation == 0) {
@@ -167,14 +170,14 @@ public class Enzyme extends AbstractProtein {
 			return;
 		} else {
 			Base current = strand.get(binding);
-			complement.set(binding, current.getComplement());
-
+			if (isOnBase())
+				complement.set(binding, current.getComplement());
 			copy = true;
 		}
 	}
 
 	// Each enzyme has a binding preference (i.e. the type of base on which it
-	// can bind) determined by its ternary structure. Because there may be more
+	// can bind) determined by its tertiary structure. Because there may be more
 	// than one of these bases in the strand, a non-default base (the default
 	// being the left-most one) can be specified.
 	private int setInitialBinding(int offset) {

@@ -80,7 +80,7 @@ public class Strand extends AbstractList<Base> {
 	public String toString() {
 		List<Base> copy = new ArrayList<>(sequence);
 		copy.removeAll(Collections.singleton(null));
-		return copy.toString();
+		return formatStrand(copy.toString());
 	}
 
 	public static String formatStrand(String strand) {
